@@ -1,0 +1,59 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+
+# Vite/React/Frontend
+dist/
+build/
+*.local
+*.env
+.env.*
+!.env.example
+*.log
+
+# Go
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# OpenAPI/Generated
+packages/api/src/contracts/v1.json
+packages/api/src/contracts/v1.ts
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+.DS_Store
+
+# Docker
+*.tar
+docker-compose.override.yml
+
+# Misc
+coverage/
+*.tgz
+*.zip
+*.gz
+*.log
+
+# OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Task runner
+.task/
