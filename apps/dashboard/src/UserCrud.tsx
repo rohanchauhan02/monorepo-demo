@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 // Import the generated types from the shared package
-import type { components } from "@monorepo/api";
 
+import type { components } from "@monorepo/api";
 type User = components["schemas"]["User"];
 type CreateUserRequest = components["schemas"]["CreateUserRequest"];
 type UpdateUserRequest = components["schemas"]["UpdateUserRequest"];
@@ -32,7 +32,7 @@ export default function UserCrud() {
       const usersList: UsersListResponse = data;
       setUsers(usersList.users || []);
       console.log("setUsers called with", usersList.users);
-    } catch (err) {
+    } catch {
       alert("Error fetching users");
     } finally {
       setLoading(false);
@@ -57,7 +57,7 @@ export default function UserCrud() {
       setForm({ name: "", email: "" });
       await fetchUsers();
       console.log("After create, users state:", users);
-    } catch (err) {
+    } catch {
       alert("Error creating user");
     } finally {
       setLoading(false);
@@ -85,7 +85,7 @@ export default function UserCrud() {
       setEditId(null);
       setEditForm({ name: undefined, email: undefined });
       await fetchUsers();
-    } catch (err) {
+    } catch {
       alert("Error updating user");
     } finally {
       setLoading(false);
@@ -103,7 +103,7 @@ export default function UserCrud() {
       const del: DeleteUserResponse = data;
       if (!del.deleted) throw new Error("Delete failed");
       await fetchUsers();
-    } catch (err) {
+    } catch {
       alert("Error deleting user");
     } finally {
       setLoading(false);
@@ -111,12 +111,12 @@ export default function UserCrud() {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: "2rem auto" }}>
-      <h2>User CRUD Demo</h2>
-      <p>
-        <strong>API URL:</strong> {API_URL}
+    <div className="max-w-xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold mb-2 text-blue-700">User CRUD Demo</h2>
+      <p className="mb-4 text-sm text-gray-500">
+        <strong>API URL:</strong> <span className="font-mono">{API_URL}</span>
       </p>
-      <form onSubmit={handleCreate} style={{ marginBottom: 16 }}>
+      <form onSubmit={handleCreate} className="flex flex-col gap-3 mb-6">
         <input
           type="text"
           placeholder="Name"
@@ -125,6 +125,7 @@ export default function UserCrud() {
             setForm((f: CreateUserRequest) => ({ ...f, name: (e.target as HTMLInputElement).value }))
           }
           required
+          className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <input
           type="email"
@@ -134,12 +135,19 @@ export default function UserCrud() {
             setForm((f: CreateUserRequest) => ({ ...f, email: (e.target as HTMLInputElement).value }))
           }
           required
+          className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
-        <button type="submit" aria-label="Create User">Create User</button>
+        <button
+          type="submit"
+          aria-label="Create User"
+          className="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          Create User
+        </button>
       </form>
 
       {editId && (
-        <form onSubmit={handleUpdate} style={{ marginBottom: 16 }}>
+        <form onSubmit={handleUpdate} className="flex flex-col gap-3 mb-6 bg-blue-50 p-4 rounded">
           <input
             type="text"
             placeholder="Name"
@@ -151,6 +159,7 @@ export default function UserCrud() {
               }))
             }
             required
+            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
           <input
             type="email"
@@ -163,41 +172,69 @@ export default function UserCrud() {
               }))
             }
             required
+            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
-          <button type="submit" aria-label="Update User">Update User</button>
-          <button type="button" onClick={() => setEditId(null)} aria-label="Cancel Edit">
-            Cancel
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              aria-label="Update User"
+              className="bg-green-600 text-white font-semibold px-4 py-2 rounded hover:bg-green-700 transition"
+            >
+              Update User
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditId(null)}
+              aria-label="Cancel Edit"
+              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       )}
 
-      <h3>User List</h3>
+      <h3 className="text-lg font-semibold mb-2">User List</h3>
       {loading ? (
-        <p>Loading...</p>
+        <p className="text-blue-600">Loading...</p>
       ) : (
-        <table border={1} cellPadding={8} style={{ width: "100%" }}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u: User) => (
-              <tr key={u.id}>
-                <td>{u.id}</td>
-                <td>{u.name}</td>
-                <td>{u.email}</td>
-                <td>
-                  <button onClick={() => startEdit(u)} aria-label={`Edit user ${u.name}`}>Edit</button>
-                  <button onClick={() => handleDelete(u.id!)} aria-label={`Delete user ${u.name}`}>Delete</button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border border-gray-200 rounded shadow">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2 text-left">ID</th>
+                <th className="px-4 py-2 text-left">Name</th>
+                <th className="px-4 py-2 text-left">Email</th>
+                <th className="px-4 py-2 text-left">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((u: User) => (
+                <tr key={u.id} className="border-t">
+                  <td className="px-4 py-2 font-mono">{u.id}</td>
+                  <td className="px-4 py-2">{u.name}</td>
+                  <td className="px-4 py-2">{u.email}</td>
+                  <td className="px-4 py-2 flex gap-2">
+                    <button
+                      onClick={() => startEdit(u)}
+                      aria-label={`Edit user ${u.name}`}
+                      className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(u.id!)}
+                      aria-label={`Delete user ${u.name}`}
+                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

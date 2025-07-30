@@ -13,12 +13,37 @@ export interface paths {
     /** Get hello */
     get: operations["get-hello"];
   };
+  "/v1/users": {
+    /** Get v1 users */
+    get: operations["get-v1-users"];
+    /** Post v1 users */
+    post: operations["post-v1-users"];
+  };
+  "/v1/users/{id}": {
+    /** Get v1 users by ID */
+    get: operations["get-v1-users-by-id"];
+    /** Put v1 users by ID */
+    put: operations["put-v1-users-by-id"];
+    /** Delete v1 users by ID */
+    delete: operations["delete-v1-users-by-id"];
+  };
 }
 
 export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    CreateUserRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      /** @description User's email */
+      email: string;
+      /** @description User's name */
+      name: string;
+    };
     ErrorDetail: {
       /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
       location?: string;
@@ -56,6 +81,27 @@ export interface components {
        */
       type?: string;
     };
+    UpdateUserRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      /** @description User's email */
+      email?: string;
+      /** @description User's name */
+      name?: string;
+    };
+    User: {
+      /** @description User's email */
+      email: string;
+      /** @description User ID */
+      id: string;
+      /** @description User's name */
+      name: string;
+      /** Format: int64 */
+      status?: number;
+    };
   };
   responses: never;
   parameters: never;
@@ -92,6 +138,130 @@ export interface operations {
       204: {
         headers: {
           Message?: string;
+        };
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  /** Get v1 users */
+  "get-v1-users": {
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          Email?: string;
+          ID?: string;
+          Name?: string;
+          Users?: components["schemas"]["User"];
+        };
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  /** Post v1 users */
+  "post-v1-users": {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateUserRequest"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          Email?: string;
+          ID?: string;
+          Name?: string;
+        };
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  /** Get v1 users by ID */
+  "get-v1-users-by-id": {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          Email?: string;
+          ID?: string;
+          Name?: string;
+        };
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  /** Put v1 users by ID */
+  "put-v1-users-by-id": {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateUserRequest"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          Email?: string;
+          ID?: string;
+          Name?: string;
+        };
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  /** Delete v1 users by ID */
+  "delete-v1-users-by-id": {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        headers: {
+          Deleted?: boolean;
         };
         content: never;
       };
