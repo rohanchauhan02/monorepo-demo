@@ -1,103 +1,148 @@
 version: '3'
 
+# Professional monorepo Taskfile for Go + Node + pnpm + Docker
+
+env:
+  NODE_OPTIONS: "--no-warnings"
+
+interval: 500ms
+silent: true
+
+vars:
+  APPS_DIR: apps
+  APPS:
+    sh: find {{.APPS_DIR}} -maxdepth 1 -type d -not -path '*/\.*' -not -path '{{.APPS_DIR}}' -exec basename {} \; | sort
+  BUILD_DIR: tmp
+  PACKAGES_DIR: packages
+  SERVICES_DIR: backend/api
+  SERVICES:
+    sh: find {{.SERVICES_DIR}} -maxdepth 1 -type d -not -path '*/\.*' -not -path '{{.SERVICES_DIR}}' -not -path '{{.SERVICES_DIR}}/internal' -exec basename {} \; | sort
+
 tasks:
-  # --- Setup ---
   setup:
-    desc: Install all dependencies (Go, Node, frontend)
+    desc: Install all dependencies (Go, pnpm, frontend, backend)
     cmds:
       - mise install
       - go mod tidy
-      - cd apps/dashboard && npm install
-      - cd packages/api && npm install
+      - pnpm install --frozen-lockfile
 
-  # --- Development ---
-  dev:
-    desc: Run backend (auto-reload) and frontend (Vite) in parallel
+  check:
+    desc: Run all code checks (lint, typecheck, etc.)
+    deps:
+      - check:biome
+      - check:be
+      - check:fe
+
+  check:biome:
+    desc: Run Biome checks
     cmds:
-      - npx concurrently "task dev-backend" "task dev-frontend"
-    silent: false
-    ignore_error: true
+      - pnpm biome check --diagnostic-level=warn{{if not .CI}} --write --unsafe{{end}} .
 
-  dev-backend:
-    desc: Run backend with auto-reload using Air (requires 'air' installed)
+  check:be:
+    desc: Run backend code checks
+    cmds:
+      - go fmt ./...
+      - go vet ./...
+      - golangci-lint run
+
+  check:fe:
+    desc: Run frontend code checks (typecheck for all apps)
+    cmds:
+      - for: { var: APPS, split: "\n" }
+        cmd: pnpm --silent --filter=./{{.APPS_DIR}}/{{.ITEM}} typecheck
+
+  dev:
+    desc: Start development environment for all apps/services
+    deps:
+      - for: { var: APPS, split: "\n" }
+        task: dev:fe
+        vars:
+          APP: '{{.ITEM}}'
+      - dev:be
+
+  dev:fe:
+    desc: Run frontend app in development mode
+    cmds:
+      - pnpm --silent --filter=./{{.APPS_DIR}}/{{.APP}} dev
+
+  dev:be:
+    desc: Run backend in development mode (auto-reload)
     cmds:
       - cd backend/api && air
 
-  dev-frontend:
-    desc: Run frontend (Vite dev server)
-    cmds:
-      - cd apps/dashboard && npm run dev
-
-  # --- Build ---
   build:
     desc: Build backend, frontend, and generate OpenAPI contracts/types
     cmds:
-      - task build-backend
-      - task build-frontend
-      - task gen-contracts
+      - task build:be
+      - task build:fe
+      - task gen:contracts
 
-  build-backend:
+  build:be:
     desc: Build Go backend for production
     cmds:
       - CGO_ENABLED=0 GOOS=linux go build -o dist/backend-api ./backend/api
 
-  build-frontend:
-    desc: Build frontend React app for production
+  build:fe:
+    desc: Build all frontend apps for production
     cmds:
-      - cd apps/dashboard && npm run build
+      - for: { var: APPS, split: "\n" }
+        cmd: pnpm --filter=./{{.APPS_DIR}}/{{.ITEM}} build
 
-  # --- Contracts/Types Generation ---
-  gen-contracts:
+  gen:contracts:
     desc: Generate OpenAPI JSON and TypeScript API contract for frontend use
     cmds:
       - go run backend/api/main.go gen:openapi
-      - npm run --workspace @monorepo/api gen:types
+      - pnpm --filter=./packages/api gen:types
 
-  # --- Linting & Testing ---
   lint:
     desc: Lint backend and frontend
     cmds:
-      - task lint-backend
-      - task lint-frontend
+      - task lint:be
+      - task lint:fe
 
-  lint-backend:
+  lint:be:
     desc: Lint Go backend code
     cmds:
       - golangci-lint run ./backend/api/...
 
-  lint-frontend:
-    desc: Lint frontend code
+  lint:fe:
+    desc: Lint all frontend apps
     cmds:
-      - cd apps/dashboard && npm run lint
+      - for: { var: APPS, split: "\n" }
+        cmd: pnpm --filter=./{{.APPS_DIR}}/{{.ITEM}} lint
 
   test:
     desc: Run backend and frontend tests
     cmds:
-      - task test-backend
-      - task test-frontend
+      - task test:be
+      - task test:fe
 
-  test-backend:
+  test:be:
     desc: Run Go backend tests
     cmds:
       - go test ./backend/api/...
 
-  test-frontend:
-    desc: Run frontend tests
+  test:fe:
+    desc: Run all frontend app tests
     cmds:
-      - cd apps/dashboard && npm test
+      - for: { var: APPS, split: "\n" }
+        cmd: pnpm --filter=./{{.APPS_DIR}}/{{.ITEM}} test
 
-  # --- Docker ---
-  docker-build:
+  docker:build:
     desc: Build the fullstack Docker image (backend + frontend)
     cmds:
       - docker build -t monorepo-fullstack .
 
-  docker-run:
+  docker:run:
     desc: Run the fullstack Docker container (backend:8080, frontend:5175)
     cmds:
       - docker run --rm --name monorepo-fullstack --env-file .env -p 8080:8080 -p 5175:5175 monorepo-fullstack
 
-  # --- Deploy (placeholder for production deployment) ---
+  clean:
+    desc: Clean build artifacts and temporary files
+    cmds:
+      - rm -rf tmp **/**/{.react-router,build,tsconfig.tsbuildinfo}
+
   deploy:
     desc: Deploy the application to production (customize as needed)
     cmds:
