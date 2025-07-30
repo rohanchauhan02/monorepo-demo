@@ -1,0 +1,26 @@
+{
+  "name": "@monorepo/api",
+  "version": "1.0.0",
+  "main": "src/contracts/v1.ts",
+  "types": "src/contracts/v1.ts",
+  "description": "Shared OpenAPI contracts and types for monorepo apps",
+  "scripts": {
+    "gen:types": "openapi-typescript src/contracts/v1.json --output src/contracts/v1.ts"
+  },
+  "keywords": [
+    "openapi",
+    "typescript",
+    "contracts",
+    "monorepo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "openapi-typescript-fetch": "^2.2.1",
+    "openapi-react-query": "^0.5.0",
+    "@tanstack/react-query": "^5.25.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^6.7.0"
+  }
+}

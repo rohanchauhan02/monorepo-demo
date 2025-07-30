@@ -1,0 +1,104 @@
+version: '3'
+
+tasks:
+  # --- Setup ---
+  setup:
+    desc: Install all dependencies (Go, Node, frontend)
+    cmds:
+      - mise install
+      - go mod tidy
+      - cd apps/dashboard && npm install
+      - cd packages/api && npm install
+
+  # --- Development ---
+  dev:
+    desc: Run backend (auto-reload) and frontend (Vite) in parallel
+    cmds:
+      - npx concurrently "task dev-backend" "task dev-frontend"
+    silent: false
+    ignore_error: true
+
+  dev-backend:
+    desc: Run backend with auto-reload using Air (requires 'air' installed)
+    cmds:
+      - cd backend/api && air
+
+  dev-frontend:
+    desc: Run frontend (Vite dev server)
+    cmds:
+      - cd apps/dashboard && npm run dev
+
+  # --- Build ---
+  build:
+    desc: Build backend, frontend, and generate OpenAPI contracts/types
+    cmds:
+      - task build-backend
+      - task build-frontend
+      - task gen-contracts
+
+  build-backend:
+    desc: Build Go backend for production
+    cmds:
+      - CGO_ENABLED=0 GOOS=linux go build -o dist/backend-api ./backend/api
+
+  build-frontend:
+    desc: Build frontend React app for production
+    cmds:
+      - cd apps/dashboard && npm run build
+
+  # --- Contracts/Types Generation ---
+  gen-contracts:
+    desc: Generate OpenAPI JSON and TypeScript API contract for frontend use
+    cmds:
+      - go run backend/api/main.go gen:openapi
+      - npm run --workspace @monorepo/api gen:types
+
+  # --- Linting & Testing ---
+  lint:
+    desc: Lint backend and frontend
+    cmds:
+      - task lint-backend
+      - task lint-frontend
+
+  lint-backend:
+    desc: Lint Go backend code
+    cmds:
+      - golangci-lint run ./backend/api/...
+
+  lint-frontend:
+    desc: Lint frontend code
+    cmds:
+      - cd apps/dashboard && npm run lint
+
+  test:
+    desc: Run backend and frontend tests
+    cmds:
+      - task test-backend
+      - task test-frontend
+
+  test-backend:
+    desc: Run Go backend tests
+    cmds:
+      - go test ./backend/api/...
+
+  test-frontend:
+    desc: Run frontend tests
+    cmds:
+      - cd apps/dashboard && npm test
+
+  # --- Docker ---
+  docker-build:
+    desc: Build the fullstack Docker image (backend + frontend)
+    cmds:
+      - docker build -t monorepo-fullstack .
+
+  docker-run:
+    desc: Run the fullstack Docker container (backend:8080, frontend:5175)
+    cmds:
+      - docker run --rm --name monorepo-fullstack --env-file .env -p 8080:8080 -p 5175:5175 monorepo-fullstack
+
+  # --- Deploy (placeholder for production deployment) ---
+  deploy:
+    desc: Deploy the application to production (customize as needed)
+    cmds:
+      - echo "Add your deployment steps here (e.g., push Docker image, update server, etc.)"

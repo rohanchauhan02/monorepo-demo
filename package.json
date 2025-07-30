@@ -1,0 +1,16 @@
+{
+  "name": "monorepo-demo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "lint": "npx @biomejs/biome check .",
+    "format": "npx @biomejs/biome format . --write",
+    "test": "npm run test --workspaces"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.4.0"
+  }
+}
