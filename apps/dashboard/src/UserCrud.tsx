@@ -111,74 +111,74 @@ export default function UserCrud() {
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-8 p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-2 text-blue-700">User CRUD Demo</h2>
-      <p className="mb-4 text-sm text-gray-500">
-        <strong>API URL:</strong> <span className="font-mono">{API_URL}</span>
+    <div>
+      <h2>User CRUD Demo</h2>
+      <p className="mb-4">
+        <strong>API URL:</strong> <span style={{ fontFamily: "monospace" }}>{API_URL}</span>
       </p>
-      <form onSubmit={handleCreate} className="flex flex-col gap-3 mb-6">
-        <input
-          type="text"
-          placeholder="Name"
-          value={form.name}
-          onChange={(e) =>
-            setForm((f: CreateUserRequest) => ({ ...f, name: (e.target as HTMLInputElement).value }))
-          }
-          required
-          className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) =>
-            setForm((f: CreateUserRequest) => ({ ...f, email: (e.target as HTMLInputElement).value }))
-          }
-          required
-          className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
+      <form onSubmit={handleCreate}>
+        <div className="form-row">
+          <input
+            type="text"
+            placeholder="Name"
+            value={form.name}
+            onChange={(e) =>
+              setForm((f: CreateUserRequest) => ({ ...f, name: (e.target as HTMLInputElement).value }))
+            }
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) =>
+              setForm((f: CreateUserRequest) => ({ ...f, email: (e.target as HTMLInputElement).value }))
+            }
+            required
+          />
+        </div>
         <button
           type="submit"
           aria-label="Create User"
-          className="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition"
+          className="primary"
         >
           Create User
         </button>
       </form>
 
       {editId && (
-        <form onSubmit={handleUpdate} className="flex flex-col gap-3 mb-6 bg-blue-50 p-4 rounded">
-          <input
-            type="text"
-            placeholder="Name"
-            value={editForm.name || ""}
-            onChange={(e) =>
-              setEditForm((f: UpdateUserRequest) => ({
-                ...f,
-                name: (e.target as HTMLInputElement).value,
-              }))
-            }
-            required
-            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={editForm.email || ""}
-            onChange={(e) =>
-              setEditForm((f: UpdateUserRequest) => ({
-                ...f,
-                email: (e.target as HTMLInputElement).value,
-              }))
-            }
-            required
-            className="border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <div className="flex gap-2">
+        <form onSubmit={handleUpdate}>
+          <div className="form-row">
+            <input
+              type="text"
+              placeholder="Name"
+              value={editForm.name || ""}
+              onChange={(e) =>
+                setEditForm((f: UpdateUserRequest) => ({
+                  ...f,
+                  name: (e.target as HTMLInputElement).value,
+                }))
+              }
+              required
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={editForm.email || ""}
+              onChange={(e) =>
+                setEditForm((f: UpdateUserRequest) => ({
+                  ...f,
+                  email: (e.target as HTMLInputElement).value,
+                }))
+              }
+              required
+            />
+          </div>
+          <div className="flex">
             <button
               type="submit"
               aria-label="Update User"
-              className="bg-green-600 text-white font-semibold px-4 py-2 rounded hover:bg-green-700 transition"
+              className="success"
             >
               Update User
             </button>
@@ -186,7 +186,7 @@ export default function UserCrud() {
               type="button"
               onClick={() => setEditId(null)}
               aria-label="Cancel Edit"
-              className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition"
+              className="secondary"
             >
               Cancel
             </button>
@@ -194,38 +194,38 @@ export default function UserCrud() {
         </form>
       )}
 
-      <h3 className="text-lg font-semibold mb-2">User List</h3>
+      <h3>User List</h3>
       {loading ? (
-        <p className="text-blue-600">Loading...</p>
+        <p className="status">Loading...</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-200 rounded shadow">
-            <thead className="bg-gray-100">
+        <div className="table-container">
+          <table>
+            <thead>
               <tr>
-                <th className="px-4 py-2 text-left">ID</th>
-                <th className="px-4 py-2 text-left">Name</th>
-                <th className="px-4 py-2 text-left">Email</th>
-                <th className="px-4 py-2 text-left">Actions</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u: User) => (
-                <tr key={u.id} className="border-t">
-                  <td className="px-4 py-2 font-mono">{u.id}</td>
-                  <td className="px-4 py-2">{u.name}</td>
-                  <td className="px-4 py-2">{u.email}</td>
-                  <td className="px-4 py-2 flex gap-2">
+                <tr key={u.id}>
+                  <td style={{ fontFamily: "monospace" }}>{u.id}</td>
+                  <td>{u.name}</td>
+                  <td>{u.email}</td>
+                  <td>
                     <button
                       onClick={() => startEdit(u)}
                       aria-label={`Edit user ${u.name}`}
-                      className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 transition"
+                      className="secondary"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(u.id!)}
                       aria-label={`Delete user ${u.name}`}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                      className="danger"
                     >
                       Delete
                     </button>
